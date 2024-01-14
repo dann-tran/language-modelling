@@ -11,6 +11,7 @@ def save_tokens(filepath: str):
     df = pd.read_parquet(filepath)
     df["tokens"] = df["text"].str.lower().apply(tokenizer.tokenize)
     df.to_parquet(filepath)
+    del df
 
 
 DIRPATH = "/Users/danntran/Repos/language-modelling/data/wikpedia-20231101.en"
