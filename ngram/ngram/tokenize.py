@@ -1,4 +1,4 @@
-PUNCTUATIONS = set('.?!,:;(){}[]"––—@#$%&')  # hyphen, en-dash, em-dash
+PUNCTUATIONS = set('.?!,:;(){}[]"-–—@#$%&')  # hyphen, en-dash, em-dash
 CONTRACTIONS = ["n't", "'ve", "'d", "'ll", "'s", "'re", "'m"]
 POSSESSIVE_APOS = ["'s", "'"]
 SUFFIX_TOKENS = CONTRACTIONS + POSSESSIVE_APOS
@@ -10,6 +10,8 @@ def tokenize(text: str):
 
     while idx < len(text):
         if text[idx].isspace():
+            if text[idx] == "\n":
+                tokens.append("\n")
             idx += 1
             continue
 
