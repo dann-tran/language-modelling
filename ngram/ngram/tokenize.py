@@ -1,5 +1,5 @@
 import json
-from typing import Iterable
+from typing import Dict, Iterable
 
 
 PUNCTUATIONS = set('.?!,:;(){}[]"-–—@#$%&|=~></\\')  # hyphen, en-dash, em-dash
@@ -84,23 +84,44 @@ class Tokenizer:
     UNK_TOKEN = "<UNK>"
     SPECIAL_TOKENS = [BOS_TOKEN, EOS_TOKEN, UNK_TOKEN]
 
-    def __init__(self, vocab: Iterable[str]):
+    def __init__(
+        self, tok2id: Dict[str, int], bos_id: int = 0, eos_id: int = 1, unk_id: int = 2
+    ):
+        assert tok2id[self.BOS_TOKEN] == bos_id
+        assert tok2id[self.EOS_TOKEN] == eos_id
+        assert tok2id[self.UNK_TOKEN] == unk_id
+        self.tok2id = tok2id
+        self.bos_id = bos_id
+        self.eos_id = eos_id
+        self.unk_id = unk_id
+
+    @classmethod
+    def load(cls, filepath: str):
+        with open(filepath, "r") as f:
+            tok2id = json.load(f)["vocab"]
+        return cls(tok2id)
+
+    @classmethod
+    def from_nonspecial_tokens(cls, vocab: Iterable[str]):
         vocab = list(vocab)
         vocab.sort()
-        self.tokens = self.SPECIAL_TOKENS + vocab
-        self.tok2id = {tok: i for i, tok in enumerate(self.tokens)}
-        self.vocab = set(self.tokens)
+        tokens = cls.SPECIAL_TOKENS + vocab
+        tok2id = {tok: i for i, tok in enumerate(tokens)}
+        return cls(tok2id)
 
     def save(self, filepath: str):
         with open(filepath, "w") as f:
-            json.dump({i: tok for i, tok in enumerate(self.vocab)}, f, indent=4)
+            json.dump({"vocab": self.tok2id}, f, indent=4)
+
+    def __len__(self):
+        return len(self.tok2id)
 
     def tokenize(self, text: str):
-        ids = [self.tok2id[self.BOS_TOKEN]]
+        ids = [self.bos_id]
 
         for tok in tokenize(text):
-            ids.append(self.tok2id.get(tok, self.tok2id[self.UNK_TOKEN]))
+            ids.append(self.tok2id.get(tok, self.unk_id))
 
-        ids.append(self.tok2id[self.EOS_TOKEN])
+        ids.append(self.eos_id)
 
         return ids
