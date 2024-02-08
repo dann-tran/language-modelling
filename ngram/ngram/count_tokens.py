@@ -1,5 +1,4 @@
 from argparse import ArgumentParser
-from collections import defaultdict
 from multiprocessing import Pool
 import os
 
@@ -10,14 +9,18 @@ from tqdm import tqdm
 
 
 def count_tokens(filepath: str):
-    token2freq = defaultdict(lambda: 0)
+    token2freq = dict()
     table = pq.read_table(filepath, columns=["tokens"])
 
     for tokens in table["tokens"]:
         for t in tokens:
-            token2freq[t.as_py()] += 1
+            t = t.as_py()
+            if t not in token2freq:
+                token2freq[t] = 1
+            else:
+                token2freq[t] += 1
 
-    return dict(token2freq)
+    return token2freq
 
 
 if __name__ == "__main__":
