@@ -16,7 +16,7 @@ def save_tokens(filepath_pair: Tuple[str, str]):
     table_in = pq.read_table(filepath_in, columns=["id", "text"])
     tokens = []
     for text in table_in["text"]:
-        text = text.as_py().lower()
+        text = text.as_py()
         tokens.append(tokenize(text))
 
     tokens = pa.array(tokens)
@@ -31,6 +31,7 @@ if __name__ == "__main__":
     parser.add_argument("--n_workers", type=int, default=4)
     args = parser.parse_args()
 
+    os.makedirs(args.dir_out, exist_ok=True)
     filenames_exclude = os.listdir(args.dir_out)
     filenames = [
         f
@@ -38,7 +39,6 @@ if __name__ == "__main__":
         if (f.endswith(".parquet") and f not in filenames_exclude)
     ]
     filepaths_in = [os.path.join(args.dir_in, f) for f in filenames]
-    os.makedirs(args.dir_out, exist_ok=True)
     filepaths_out = [os.path.join(args.dir_out, f) for f in filenames]
 
     with Pool(args.n_workers) as pool:
