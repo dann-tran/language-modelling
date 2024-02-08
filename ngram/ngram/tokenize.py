@@ -47,6 +47,9 @@ def tokenize(text: str):
         for suffix in SUFFIX_TOKENS:
             if text.endswith(suffix, idx, idx_forward):
                 tok = text[idx : idx_forward - len(suffix)]
+                if tok.startswith("'"):
+                    tokens.append("'")
+                    tok = tok[1:]
                 if tok:
                     tokens.append(tok)
                 tokens.append(suffix)
@@ -58,8 +61,18 @@ def tokenize(text: str):
             continue
 
         tok = text[idx:idx_forward]
-        if tok:
+        if tok.startswith("'"):
+            tokens.append("'")
+            tok = tok[1:]
+
+        if tok.endswith("'"):
+            tok = tok[:-1]
+            if tok:
+                tokens.append(tok)
+            tokens.append("'")
+        elif tok:
             tokens.append(tok)
+
         idx = idx_forward
 
     return tokens
